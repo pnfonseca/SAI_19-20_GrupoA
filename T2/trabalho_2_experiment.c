@@ -1,5 +1,6 @@
 #include "mr32.h"
 #include <stdbool.h>
+#include <string.h>
 
 
 int
@@ -20,7 +21,7 @@ main (void)
 	TRISGbits.TRISG7 = 1;
 	
 bool start,stop;
-int distancia, bit_lido, escutar, contagem_bit, espera, i;
+int bit_lido, escutar, contagem_bit, espera;
 char leituras[32];
 
 escutar=0;
@@ -42,9 +43,10 @@ printf( "\n" );
 		escutar=1;
 		contagem_bit=1;
 		leituras[0]='0';
-		printf("leu o primeiro");
-		printf( "\n" );
+		/*printf("leu o primeiro"); */
+		putChar('.');
 		}
+		
 	if (escutar==1 && contagem_bit==1  && readCoreTimer()>= 13000 /*325microsegundos*/){
 
 		if (bit_lido==0){
@@ -56,10 +58,11 @@ printf( "\n" );
 			leituras[1]='1';
 		}
 		contagem_bit=2;
-		printf("leu o segundo");
-		printf( "\n" );
+		/*printf("leu o segundo");
+		printf( "\n" );*/
 		resetCoreTimer();
 		}
+		
 	while (contagem_bit<31 && contagem_bit>=2) {
 		
 		if (readCoreTimer()>=espera) {
@@ -76,37 +79,39 @@ printf( "\n" );
 			}
 			contagem_bit=contagem_bit+1;
 			resetCoreTimer();
-			printf("leu os outros");
-			printf( "\n" );
+			/*printf("leu os outros");
+			printf( "\n" );*/
 		}
 		
 			
 		
 	}
- int i=0;
+	
+	int i=0;
+	
 	if (contagem_bit==31) {	
 		for(i=0;i<=31;++i){
-		printf("%d", leituras[i]);
-	}
-		printf( "\n" );
-		printf("acabei de ler");
-		printf( "\n" );
-		contagem_bit=0;
-		strncpy( leituras, '1', sizeof( leituras ) );
-		escutar=
-		0;
-		wait(5);
-		if(leituras[i]='0000101010010100100100100101010'){
-		setVel2(100,100);
-}
-	}
-	wait(10);	
+			printf("%d", leituras[i]);
+		}
+		/*printf( "\n" ); printf("acabei de ler"); printf( "\n" );*/ 
+		contagem_bit=0; 
+		
+		 
+		escutar= 0; 
+		wait(5); 
+		
+		if(leituras[i]=="0000101010010100100100100101010"){ 
+			setVel2(100,100);
+		}
 
+		strncpy( leituras, "11111111111111111111111111111111", sizeof( leituras ) );
+
+	}
 	
-
-}
+	// wait(10);
+	
+	}
+  
   return (0);
   
-
-
 }
