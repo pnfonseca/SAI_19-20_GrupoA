@@ -21,7 +21,7 @@ main (void)
 	TRISGbits.TRISG7 = 1;
 	
 bool start,stop;
-int bit_lido, escutar, contagem_bit, espera;
+int bit_lido, escutar, contagem_bit, espera,i;
 char leituras[32];
 
 escutar=0;
@@ -32,19 +32,17 @@ printf( "\n" );
 
   while (1)
     {
+
 	
-	start=PORTBbits.RB3;
-	stop=PORTBbits.RB4;
+	bit_lido = PORTGbits.RG7;
 	
-	bit_lido = LATGbits.LATG7;
-	
-	if (bit_lido==0 && escutar==0 && stop==0){
+	if (bit_lido==0 && escutar==0){
 		resetCoreTimer();
 		escutar=1;
 		contagem_bit=1;
 		leituras[0]='0';
 		/*printf("leu o primeiro"); */
-		putChar('.');
+		
 		}
 		
 	if (escutar==1 && contagem_bit==1  && readCoreTimer()>= 13000 /*325microsegundos*/){
@@ -52,10 +50,12 @@ printf( "\n" );
 		if (bit_lido==0){
 			espera=26000;
 			leituras[1]='0';
+			
 		}
 		if (bit_lido==1){
 			espera=22000;
 			leituras[1]='1';
+			
 		}
 		contagem_bit=2;
 		/*printf("leu o segundo");
@@ -67,15 +67,17 @@ printf( "\n" );
 		
 		if (readCoreTimer()>=espera) {
 			
-			bit_lido = LATGbits.LATG7;
+		bit_lido = PORTGbits.RG7;
 		
 			if (bit_lido==0){
 			espera=26000;
 			leituras[contagem_bit]='0';
+			
 			}
 			if (bit_lido==1){
 			espera=22000;
 			leituras[contagem_bit]='1';
+		
 			}
 			contagem_bit=contagem_bit+1;
 			resetCoreTimer();
@@ -87,28 +89,36 @@ printf( "\n" );
 		
 	}
 	
-	int i=0;
+
 	
 	if (contagem_bit==31) {	
-		for(i=0;i<=31;++i){
-			printf("%d", leituras[i]);
-		}
-		/*printf( "\n" ); printf("acabei de ler"); printf( "\n" );*/ 
 		contagem_bit=0; 
-		
-		 
 		escutar= 0; 
-		wait(5); 
+
 		
-		if(leituras[i]=="0000101010010100100100100101010"){ 
-			setVel2(100,100);
+		for(i=0;i<32;i++){
+			putChar(leituras[i]);
+			printf("\n");
 		}
 
-		strncpy( leituras, "11111111111111111111111111111111", sizeof( leituras ) );
+	char frente[32]="";
+	
+	int ret;
+	ret = strcmp(leituras, frente);
+
+	if (ret==0){
+		setVel2(100,100);
+		}
+	
+	
+	strncpy( leituras, "11111111111111111111111111111111", sizeof( leituras ) );
+
+
 
 	}
 	
-	// wait(10);
+	
+	
 	
 	}
   
