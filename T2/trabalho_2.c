@@ -1,3 +1,5 @@
+/* Just for test */
+
 #include "mr32.h"
 #include <stdbool.h>
 
@@ -16,9 +18,9 @@ main (void)
 
 	TRISBbits.TRISB3 = 1;
 	TRISBbits.TRISB4 = 1;
-	
+
 	TRISGbits.TRISG7 = 1;
-	
+
 bool start,stop;
 int distancia, bit_lido, escutar, contagem_bit, espera;
 char leituras[32];
@@ -31,10 +33,10 @@ espera=0;
     {
 	start=PORTBbits.RB3;
 	stop=PORTBbits.RB4;
-	
-	
+
+
 	bit_lido = LATGbits.LATG7;
-	
+
 	if (bit_lido==0 && escutar==0 && start==0){
 		resetCoreTimer();
 		escutar=1;
@@ -44,9 +46,9 @@ espera=0;
 		printf( "\n" );
 		}
 	if (escutar==1 && contagem_bit==1  && readCoreTimer()>=13000 /*325microsegundos*/){
-		
+
 		bit_lido = LATGbits.LATG7;
-		
+
 		if (bit_lido==0){
 			espera=26000;
 			leituras[1]="0";
@@ -61,11 +63,11 @@ espera=0;
 		resetCoreTimer();
 		}
 	while (contagem_bit<=32 && contagem_bit>=2) {
-		
+
 		if (readCoreTimer()>=espera) {
-			
+
 			bit_lido = LATGbits.LATG7;
-		
+
 			if (bit_lido==0){
 			espera=26000;
 			leituras[contagem_bit]="0";
@@ -79,9 +81,9 @@ espera=0;
 			printf("%c", 'leu os outros');
 			printf( "\n" );
 		}
-		
-			
-		
+
+
+
 	}
 	if (contagem_bit==32) {
 		printf("%c", leituras);
@@ -91,8 +93,8 @@ espera=0;
 		escutar=0;
 		wait(10);
 	}
-		
-	
+
+
     }
   return (0);
 }
