@@ -12,11 +12,13 @@ main (void)
   double voltagem_esquerda;
   double voltagem_direita;
   double voltagem_luz_ambiente;
-  int limite=1700;
-  int limite_frente=100;
+
   int luz_ambiente=1650;
+  int limite=luz_ambiente*1.02;
   double diferenca;
   bool start, stop;
+  double velocidade=30;
+  double degrade=velocidade/luz_ambiente;
 
   
     TRISBbits.TRISB3 = 1;
@@ -42,7 +44,7 @@ while (1)
 		luz_ambiente=(sensor_esquerdo+sensor_direito)/2;
 		voltagem_luz_ambiente=(luz_ambiente * 3300) / 1023;
 		printf("Robô calibrado! \n");
-		limite=luz_ambiente * 1.05;
+		limite=luz_ambiente * 1.02;
 		}
 		
       readAnalogSensors();
@@ -63,32 +65,19 @@ while (1)
 	  printf("Esquerda: %4.0f	\t Direita: %4.0f \t Diferença: %4.0f    \t", voltagem_esquerda, voltagem_direita, diferenca);
 
 	  /*wait(1);*/
-
+	  
+/*Verificar se tiver pouca luz*/
 if ((voltagem_esquerda < limite) && (voltagem_direita < limite)) {
+	 /*Se sim, pára*/
 	   setVel2(0,0);
 	   printf("\r");
 	   }
-else { 
-	if (abs(diferenca) <= limite_frente) {
-		if (voltagem_esquerda >= limite && voltagem_direita >= limite) {
-			setVel2(30,30);
-			printf("A andar em frente        \r");
-		}
-		else{
-			printf("\r");
-		}
+/*Se tiver luz*/  
+else {
+		setVel2(velocidade+(degrade*diferenca),velocidade-(degrade*diferenca));
+		printf("A andar para o lado   \r");
 	}
-	else {
-		if (diferenca < 0) {
-			setVel2(0,30);
-			printf("A andar para a esquerda   \r");
-		}
-		else {
-			setVel2(30,0);
-			printf("A andar para a direita   \r");
-		}
-	}
-}
+
 
 wait(3);
 }
