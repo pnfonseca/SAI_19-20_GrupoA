@@ -1,80 +1,67 @@
+/* Incluir a biblioteca do robô */
 #include "mr32.h"
+/* Incluir booleanos */
 #include <stdbool.h>
-
 
 int
 main (void)
 {
-  /* Variable declarations go here */
-
   /* initPIC32() makes all the required initializations to the
    * PIC32 hardware platform */
   initPIC32 ();
-
+	
+/* Definir B3 e B4 como inputs e Eo e E1 como outputs */
 	TRISEbits.TRISE0 = 0;
 	TRISEbits.TRISE1 = 0;
-
 	TRISBbits.TRISB3 = 1;
 	TRISBbits.TRISB4 = 1;
 	
-bool start,stop;
-int distancia;
-int s1,s2E,s2D,s3E,s3D;
-int x, correr, contar;
-double velocidade;
-bool parar;
-
-int n_voltas;
-int distancia_frente;
+/* Definir variáveis */	
+bool start,stop; /* Botoes start e stop */
+int distancia; /* Distância de um obstáculo, atraves do sensor da frente */
+int s1,s2E,s2D,s3E,s3D; /* Leitura do sensor de chão correspondente */
+int x, correr, contar; /* Variáveis de estado auxiliares */
+double velocidade; /* Multiplicador de velocidade do robô */
+bool parar; /* Variável de controlo */
+int n_voltas; /* Contador do numero de voltas */
+int distancia_frente; /* Distância de um obstáculo, atraves do sensor da frente */
  
- enableObstSens();
+ enableObstSens(); /* Ligar os sensores de obstáculos */
 
 
-  while (1)
-    {
-		
-	TRISBbits.TRISB3 = 1;
-    TRISBbits.TRISB4 = 1;	
-		
-	start=PORTBbits.RB3;
+  while (1) /* Loop */
+    {	
+	start=PORTBbits.RB3; /* Ler o estado dos botões */   /* !!!O botao start é igual a 1 quando não esta carregado (normalmente fechado)!!! */
 	stop=PORTBbits.RB4;
-	velocidade=1;
+	velocidade=1; /* Definir o multiplicador da velocidade */
 	
-
-/* o botao start é igual a 1 quando não esta carregado (normalmente fechado) */
-
- 	if (start==0 && correr==0) {
+ 	if (start==0 && correr==0) { /* Se o Start estiver carregado e o robo nao estiver em funcionamento, entra em funcionamento e faz o reset do contador de voltas */
  	/*LATEbits.LATE0 = 1;*/
  	correr=1;
  	n_voltas=0;
 	}
 
-	if (stop==0) {
- 	/*LATEbits.LATE0 = 0;*/
+	if (stop==0) { /* Se o Stop estiver carregado, pára o funcionamento */
  	correr=0;
 	}
 	
-	while(correr==1){
+	while(correr==1){ /* Loop de controlo durante o funcionamento */
 		
-	readAnalogSensors();
-    distancia_frente=analogSensors.obstSensFront;     	
+	readAnalogSensors(); /* Ler os sensores de obstáculos */
+    	distancia_frente=analogSensors.obstSensFront; /* Escrever o valor da distância ao obstáculo */
 		
-		if (distancia_frente <= 15)
+	if (distancia_frente <= 15) /* Se a distância ao obstáculo for menor que 15cm, ordena suspender temporariamente o funcionamento até sair o obstáculo */
         {
-			parar=1;
+		parar=1;
         }
-    else {
+    	else {
 		parar=0;
 	}
  	
-		
-	enableGroundSens();
-	x=readLineSensors(0);
-	/*delay(1000);
-	printInt10(x);
-	printStr("\n");*/
+	enableGroundSens(); /* Ligar os sensores de chão */
+	x=readLineSensors(0); /* Ler o valor dos sensores de chão */
  
-	if(x==31) {
+	if(x==31) { /* Tabela de condições para andar em frente, virar ou parar. */
 	setVel2(40*velocidade,40*velocidade);
 	}
 	if(x==4){
@@ -95,28 +82,28 @@ int distancia_frente;
 	if(x==0){
 	setVel2(0,0);
 	}
-	if(parar==1){
+	if(parar==1){ /* Parar se tiver obstáculo */
 	setVel2(0,0);
 	}
 	
-	if (n_voltas < 16){
-		if (x==31){
+	if (n_voltas < 16){ /* Contador de voltas quando o robot passa no travessão de volta */
+		if (x==31){ /* Quando o robot entra no travessão, altera uma variável auxiliar de passagem pelo travessão*/
 			contar=1;
 			}
-        if (x != 31 && contar==1)
+	if (x != 31 && contar==1) /* Quando o robot sai do travessão e tem a variável de passagem a um, incrementa o contador de volta */
         {
         n_voltas = n_voltas + 1;
-        contar=0;
-        printInt10(n_voltas);
+        contar=0; /* Leva a variável auxiliar a zero */
+        printInt10(n_voltas); /* Escreve na consola o numero de voltas */
 		printStr("\n");
 		}
 	}
 	
-	if (n_voltas==16){
+	if (n_voltas==16){ /* Quando acaba as voltas préprogramadas, faz um pião */
 		setVel2(-50,50);
 	}
 	
-		if(n_voltas==0){
+	if(n_voltas==0){ /* Tabela de estados para acender os leds */
             LATEbits.LATE0 = 0;
             LATEbits.LATE1 = 0;
             LATEbits.LATE2 = 0;
@@ -134,13 +121,13 @@ int distancia_frente;
             LATEbits.LATE2 = 0;
             LATEbits.LATE3 = 0;
 		}
-		if(n_voltas==3){
+	if(n_voltas==3){
             LATEbits.LATE0 = 1;
             LATEbits.LATE1 = 1;
             LATEbits.LATE2 = 0;
-			LATEbits.LATE0 = 0;
+	    LATEbits.LATE3 = 0;
 		}
-		if(n_voltas==4){
+	if(n_voltas==4){
             LATEbits.LATE0 = 0;
             LATEbits.LATE1 = 0;
             LATEbits.LATE2 = 1;
@@ -162,9 +149,9 @@ int distancia_frente;
             LATEbits.LATE0 = 1;
             LATEbits.LATE1 = 1;
             LATEbits.LATE2 = 1;
-			LATEbits.LATE0 = 0;
+	    LATEbits.LATE3 = 0;
 		}
-    	     if(n_voltas==8){
+    	if(n_voltas==8){
             LATEbits.LATE0 = 0;
             LATEbits.LATE1 = 0;
             LATEbits.LATE2 = 0;
@@ -186,9 +173,9 @@ int distancia_frente;
             LATEbits.LATE0 = 1;
             LATEbits.LATE1 = 1;
             LATEbits.LATE2 = 0;
-			LATEbits.LATE0 = 1;
+	    LATEbits.LATE3 = 1;
 		}
-		if(n_voltas==12){
+	if(n_voltas==12){
             LATEbits.LATE0 = 0;
             LATEbits.LATE1 = 0;
             LATEbits.LATE2 = 1;
@@ -210,15 +197,12 @@ int distancia_frente;
             LATEbits.LATE0 = 1;
             LATEbits.LATE1 = 1;
             LATEbits.LATE2 = 1;
-			LATEbits.LATE0 = 1;
+	    LATEbits.LATE3 = 1;
 		}
 		
-		if (stop==0) {
-		/*LATEbits.LATE0 = 0;*/
-		correr=0;
-		}
-		
-		
+	if (stop==0) { /* Parar o funcionamento do robot com o botão stop */
+	    correr=0;
+	        }
 			}
 			
 }
